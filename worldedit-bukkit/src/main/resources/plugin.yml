@@ -1,4 +1,4 @@
-name: WorldEdit
+name: RoryEdit
 main: com.sk89q.worldedit.bukkit.WorldEditPlugin
 version: "${internalVersion}"
 load: STARTUP
