@@ -35,7 +35,7 @@ dependencies {
     }
 
     "api"(project(":worldedit-libs:core"))
-    "implementation"("de.schlichtherle:truezip:6.8.4")
+    "compileOnly"("de.schlichtherle:truezip:6.8.4")
     "implementation"("org.mozilla:rhino-runtime:1.7.13")
     "implementation"("org.yaml:snakeyaml:1.26")
     "implementation"("com.google.guava:guava")
@@ -59,7 +59,7 @@ dependencies {
     "compileOnly"("com.google.auto.value:auto-value-annotations:${Versions.AUTO_VALUE}")
     "annotationProcessor"("com.google.auto.value:auto-value:${Versions.AUTO_VALUE}")
 
-    "languageFiles"("${project.group}:worldedit-lang:7.2.6:289@zip")
+    "languageFiles"("${project.group}:worldedit-lang:7.2.6:355@zip")
 
     "testRuntimeOnly"("org.apache.logging.log4j:log4j-core:2.14.1")
 }

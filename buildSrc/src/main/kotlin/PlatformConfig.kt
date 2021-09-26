@@ -44,7 +44,6 @@ fun Project.applyPlatformAndCoreConfiguration() {
             val disabledLint = listOf(
                 "processing", "path", "fallthrough", "serial"
             )
-            options.release.set(8)
             options.compilerArgs.addAll(listOf("-Xlint:all") + disabledLint.map { "-Xlint:-$it" })
             options.isDeprecation = true
             options.encoding = "UTF-8"
@@ -61,6 +60,7 @@ fun Project.applyPlatformAndCoreConfiguration() {
     }
 
     dependencies {
+        "compileOnly"("com.google.code.findbugs:jsr305:3.0.2")
         "testImplementation"("org.junit.jupiter:junit-jupiter-api:${Versions.JUNIT}")
         "testImplementation"("org.junit.jupiter:junit-jupiter-params:${Versions.JUNIT}")
         "testImplementation"("org.mockito:mockito-core:${Versions.MOCKITO}")
@@ -80,10 +80,22 @@ fun Project.applyPlatformAndCoreConfiguration() {
         }
     }
 
-    the<JavaPluginExtension>().withJavadocJar()
+    configure<JavaPluginExtension> {
+        withJavadocJar()
+    }
 
     if (name in setOf("worldedit-core", "worldedit-bukkit", "worldedit-fabric")) {
         the<JavaPluginExtension>().withSourcesJar()
+    }
+
+    if (name !in setOf("worldedit-fabric", "worldedit-forge")) {
+        configurations["compileClasspath"].apply {
+            resolutionStrategy.componentSelection {
+                withModule("org.slf4j:slf4j-api") {
+                    reject("No SLF4J allowed on compile classpath")
+                }
+            }
+        }
     }
 
     tasks.named("check").configure {

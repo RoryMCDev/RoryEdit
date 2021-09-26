@@ -54,13 +54,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Entity;
-import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
 import java.lang.ref.WeakReference;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -79,8 +76,6 @@ public class BukkitWorld extends AbstractWorld {
 
     private static final boolean HAS_3D_BIOMES;
     private static final boolean HAS_MIN_Y;
-    private static final Method GET_MIN_Y;
-    private int minY;
 
     private static final Map<Integer, Effect> effects = new HashMap<>();
 
@@ -99,15 +94,12 @@ public class BukkitWorld extends AbstractWorld {
             temp = false;
         }
         HAS_3D_BIOMES = temp;
-        Method tempGetMinY;
         try {
-            tempGetMinY = World.class.getMethod("getMinHeight");
+            World.class.getMethod("getMinHeight");
             temp = true;
         } catch (NoSuchMethodException e) {
-            tempGetMinY = null;
             temp = false;
         }
-        GET_MIN_Y = tempGetMinY;
         HAS_MIN_Y = temp;
     }
 
@@ -126,13 +118,6 @@ public class BukkitWorld extends AbstractWorld {
             this.worldNativeAccess = adapter.createWorldNativeAccess(world);
         } else {
             this.worldNativeAccess = null;
-        }
-        if (HAS_MIN_Y) {
-            try {
-                minY = (int) GET_MIN_Y.invoke(world);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                minY = super.getMinY();
-            }
         }
     }
 
@@ -229,7 +214,7 @@ public class BukkitWorld extends AbstractWorld {
             if (adapter != null) {
                 return adapter.regenerate(getWorld(), region, extent, options);
             } else {
-                throw new UnsupportedOperationException("Missing BukkitImplAdapater for this version.");
+                throw new UnsupportedOperationException("Missing BukkitImplAdapter for this version.");
             }
         } catch (Exception e) {
             LOGGER.warn("Regeneration via adapter failed.", e);
@@ -237,37 +222,18 @@ public class BukkitWorld extends AbstractWorld {
         }
     }
 
-    /**
-     * Gets the single block inventory for a potentially double chest.
-     * Handles people who have an old version of Bukkit.
-     * This should be replaced with {@link org.bukkit.block.Chest#getBlockInventory()}
-     * in a few months (now = March 2012) // note from future dev - lol
-     *
-     * @param chest The chest to get a single block inventory for
-     * @return The chest's inventory
-     */
-    private Inventory getBlockInventory(Chest chest) {
-        try {
-            return chest.getBlockInventory();
-        } catch (Throwable t) {
-            if (chest.getInventory() instanceof DoubleChestInventory) {
-                DoubleChestInventory inven = (DoubleChestInventory) chest.getInventory();
-                if (inven.getLeftSide().getHolder().equals(chest)) {
-                    return inven.getLeftSide();
-                } else if (inven.getRightSide().getHolder().equals(chest)) {
-                    return inven.getRightSide();
-                } else {
-                    return inven;
-                }
-            } else {
-                return chest.getInventory();
-            }
-        }
-    }
-
     @Override
     public boolean clearContainerBlockContents(BlockVector3 pt) {
         checkNotNull(pt);
+
+        BukkitImplAdapter adapter = WorldEditPlugin.getInstance().getBukkitImplAdapter();
+        if (adapter != null) {
+            try {
+                return adapter.clearContainerBlockContents(getWorld(), pt);
+            } catch (Exception ignored) {
+            }
+        }
+
         if (!getBlock(pt).getBlockType().getMaterial().hasContainer()) {
             return false;
         }
@@ -281,7 +247,7 @@ public class BukkitWorld extends AbstractWorld {
         InventoryHolder chest = (InventoryHolder) state;
         Inventory inven = chest.getInventory();
         if (chest instanceof Chest) {
-            inven = getBlockInventory((Chest) chest);
+            inven = ((Chest) chest).getBlockInventory();
         }
         inven.clear();
         return true;
@@ -374,11 +340,10 @@ public class BukkitWorld extends AbstractWorld {
 
     @Override
     public int getMinY() {
-        /*if (HAS_MIN_Y) {
+        if (HAS_MIN_Y) {
             return getWorld().getMinHeight();
         }
-        return super.getMinY();*/
-        return minY;
+        return super.getMinY();
     }
 
     @SuppressWarnings("deprecation")
