@@ -17,16 +17,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.sk89q.worldedit.fabric.mixin;
+package com.sk89q.worldedit.extent.clipboard.io.sponge;
 
-import net.minecraft.network.packet.c2s.play.ClientSettingsC2SPacket;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ClientSettingsC2SPacket.class)
-public interface AccessorClientSettingsC2SPacket {
+import com.sk89q.worldedit.world.DataFixer;
 
-    @Accessor
-    String getLanguage();
+import javax.annotation.Nullable;
 
+final class VersionedDataFixer {
+    private final int dataVersion;
+    @Nullable
+    private final DataFixer fixer;
+
+    VersionedDataFixer(int dataVersion, @Nullable DataFixer fixer) {
+        this.dataVersion = dataVersion;
+        this.fixer = fixer;
+    }
+
+    public boolean isActive() {
+        return fixer != null;
+    }
+
+    public <T> T fixUp(DataFixer.FixType<T> type, T original) {
+        if (!isActive()) {
+            return original;
+        }
+        return fixer.fixUp(type, original, dataVersion);
+    }
 }

@@ -17,20 +17,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.sk89q.worldedit.fabric.mixin;
-
-import net.minecraft.world.SaveProperties;
-import net.minecraft.world.gen.GeneratorOptions;
-import net.minecraft.world.level.LevelProperties;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.gen.Accessor;
-
-@Mixin(LevelProperties.class)
-public interface AccessorLevelProperties extends SaveProperties {
-
-    @Accessor
-    @Mutable
-    void setGeneratorOptions(GeneratorOptions options);
-
-}
+/**
+ * This package is <em>internal</em>, containing implementation details of the Sponge Schematic
+ * Specification. Use the {@link com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats} or
+ * {@link com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat} classes to
+ * acquire readers and writers instead.
+ */
+package com.sk89q.worldedit.extent.clipboard.io.sponge;

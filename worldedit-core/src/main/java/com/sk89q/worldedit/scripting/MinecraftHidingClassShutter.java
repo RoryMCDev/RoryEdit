@@ -17,33 +17,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.sk89q.worldedit.fabric.mixin;
+package com.sk89q.worldedit.scripting;
 
-import com.sk89q.worldedit.fabric.MutableBiomeArray;
-import com.sk89q.worldedit.internal.util.BiomeMath;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.BiomeArray;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.mozilla.javascript.ClassShutter;
 
-@Mixin(BiomeArray.class)
-public abstract class MixinBiomeArray implements MutableBiomeArray {
-
-    @Final
-    @Shadow
-    private Biome[] data;
-
-    @Final
-    @Shadow
-    private int field_28126; // minY
-
-    @Final
-    @Shadow
-    private int field_28127; // maxY
-
+/**
+ * Hides Minecraft's obfuscated names from scripts.
+ */
+class MinecraftHidingClassShutter implements ClassShutter {
     @Override
-    public void setBiome(int x, int y, int z, Biome biome) {
-        this.data[BiomeMath.computeBiomeIndex(x, y, z, field_28126, field_28127)] = biome;
+    public boolean visibleToScripts(String fullClassName) {
+        return fullClassName.contains(".") || fullClassName.length() >= 4;
     }
 }
